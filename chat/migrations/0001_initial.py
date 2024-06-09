@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Chatroom',
+            name='chatroom',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100)),
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('users', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'verbose_name': 'Chatroom',
+                'verbose_name': 'chatroom',
                 'verbose_name_plural': 'Chatrooms',
             },
         ),

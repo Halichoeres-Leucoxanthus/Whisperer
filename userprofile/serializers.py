@@ -22,15 +22,19 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'username', 'email', 'bio', 'profile_picture']
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'bio', 'profile_picture']
 
     def update(self, instance, validated_data):
         user = instance.user
+        user.first_name = validated_data.get('user', {}).get('first_name', user.first_name)
+        user.last_name = validated_data.get('user', {}).get('last_name', user.last_name)
         user.username = validated_data.get('user', {}).get('username', user.username)
         user.email = validated_data.get('user', {}).get('email', user.email)
         user.save()

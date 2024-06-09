@@ -8,7 +8,7 @@ class Chatroom(models.Model):
     description = models.TextField()
 
     class Meta:
-        verbose_name = 'Chatroom'
+        verbose_name = 'chatroom'
         verbose_name_plural = 'Chatrooms'
 
     def __str__(self):
