@@ -12,4 +12,3 @@ class UserProfile(models.Model):
         user_profile = cls(user=user)
         user_profile.save()
         return user_profile
-

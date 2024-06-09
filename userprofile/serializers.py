@@ -5,6 +5,11 @@ from django.contrib.auth import authenticate
 from .models import UserProfile
 from Whisperer import settings
 import os
+# merhaba
+
+
+
+
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -12,13 +17,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['first_name', 'last_name', 'username', 'email', 'password']
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
         user = super().create(validated_data)
         UserProfile.objects.create(user=user)
         return user
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)

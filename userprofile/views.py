@@ -20,7 +20,7 @@ class DeleteAccountView(APIView):
         user_profile = UserProfile.objects.get(user=user)
 
         if user_profile.profile_picture:
-            profile_picture_path = os.path.join(settings.MEDIA_ROOT,'profile_pics', user_profile.profile_picture.name)
+            profile_picture_path = os.path.join(settings.MEDIA_ROOT, 'profile_pics', user_profile.profile_picture.name)
             if os.path.exists(profile_picture_path):
                 os.remove(profile_picture_path)
 
@@ -77,12 +77,12 @@ class UserProfileView(APIView):
             serializer = UserProfileSerializer(user_profile)
             return Response(serializer.data)
         except UserProfile.DoesNotExist:
-            return Response({'error': 'User Profile Not Found'},status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'User Profile Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request):
         try:
             user_profile = UserProfile.objects.get(user=request.user)
-            serializer = UserProfileSerializer(user_profile, data=request.data,partial=True)
+            serializer = UserProfileSerializer(user_profile, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -91,8 +91,7 @@ class UserProfileView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except UserProfile.DoesNotExist:
-            return Response({'error': 'User Profile Not Found'},status=status.HTTP_404_NOT_FOUND)
-
+            return Response({'error': 'User Profile Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class UserLoginView(APIView):
@@ -105,6 +104,8 @@ class UserLoginView(APIView):
             return Response({
                 'user': {
                     'id': user.id,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
                     'username': user.username,
                     'email': user.email
                 }
@@ -136,12 +137,14 @@ def check_login(request):
     else:
         return JsonResponse({'message': 'Guest user'})
 
+
 class UserProfileListCreateView(generics.ListCreateAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class UserProfileRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
