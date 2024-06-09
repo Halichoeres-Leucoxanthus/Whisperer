@@ -1,10 +1,10 @@
+from django.contrib.auth.models import User
 from django.db import models
-from rest_framework.authtoken.admin import User
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(max_length=500, blank=True)
+    bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profile_pics', null=True, blank=True)
 
     @classmethod
@@ -12,3 +12,4 @@ class UserProfile(models.Model):
         user_profile = cls(user=user)
         user_profile.save()
         return user_profile
+
