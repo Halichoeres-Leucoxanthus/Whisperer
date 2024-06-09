@@ -5,11 +5,6 @@ from django.contrib.auth import authenticate
 from .models import UserProfile
 from Whisperer import settings
 import os
-# merhaba
-
-
-
-
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
