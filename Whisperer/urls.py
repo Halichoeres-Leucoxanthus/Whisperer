@@ -36,6 +36,7 @@ urlpatterns = [
     path('profile/<int:pk>/', UserProfileRetrieveUpdateDestroyView.as_view(),
          name='userprofile-retrieve-update-destroy'),
 
+
     # Chatroom URLs
     path('create_chatroom/', create_chatroom, name='create_chatroom'),
     path('chatroom_list/', chatroom_list, name='chatroom_list'),
