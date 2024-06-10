@@ -14,37 +14,35 @@
   let newPassword = '';
   let newPasswordConfirm = '';
   let passwordChangeError = '';
+  let firstName = '';
+  let lastName = '';
 
   onMount(async () => {
     try {
-      const response = await fetch('http://localhost:8000/user-profile/', {
-        credentials: 'include'
-      });
+      const response = await fetch('http://localhost:8000/user-profile/', { credentials: 'include' });
       const data = await response.json();
-      console.log('Profile Picture URL:', data.profile_picture); // Log the profile picture URL
+      console.log('Profile Picture URL:', data.profile_picture);
+      // Log the profile picture URL
       userProfile = data;
       newUsername = data.username;
       newEmail = data.email;
       newBio = data.bio;
-
       if (data.profile_picture) {
-        const profilePictureResponse = await fetch(`http://localhost:8000${data.profile_picture}`, {
-          credentials: 'include'
-        });
+        const profilePictureResponse = await fetch(`http://localhost:8000${data.profile_picture}`, { credentials: 'include' });
         const profilePicture = await profilePictureResponse.blob();
         userProfile.profile_picture = URL.createObjectURL(profilePicture);
       } else {
         userProfile.profile_picture = 'https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_640.png';
       }
+      firstName = data.first_name;
+      lastName = data.last_name;
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
   });
 
   async function getCsrfToken() {
-    const response = await fetch('http://localhost:8000/get-csrf-token/', {
-      credentials: 'include'
-    });
+    const response = await fetch('http://localhost:8000/get-csrf-token/', { credentials: 'include' });
     const { csrfToken } = await response.json();
     return csrfToken;
   }
@@ -56,20 +54,10 @@
       formData.append('username', newUsername);
       formData.append('email', newEmail);
       formData.append('bio', newBio);
-
       if (newProfilePicture instanceof File) {
         formData.append('profile_picture', newProfilePicture);
       }
-
-      const response = await fetch('http://localhost:8000/user-profile/', {
-        method: 'PUT',
-        headers: {
-          'X-CSRFToken': csrfToken
-        },
-        body: formData,
-        credentials: 'include'
-      });
-
+      const response = await fetch('http://localhost:8000/user-profile/', { method: 'PUT', headers: { 'X-CSRFToken': csrfToken }, body: formData, credentials: 'include' });
       if (response.ok) {
         userProfile = await response.json();
         editMode = false;
@@ -86,14 +74,7 @@
       const confirmed = confirm('Are you sure you want to delete your account? This action cannot be undone.');
       if (confirmed) {
         const csrfToken = await getCsrfToken();
-        const response = await fetch('http://localhost:8000/delete-account/', {
-          method: 'DELETE',
-          headers: {
-            'X-CSRFToken': csrfToken
-          },
-          credentials: 'include'
-        });
-
+        const response = await fetch('http://localhost:8000/delete-account/', { method: 'DELETE', headers: { 'X-CSRFToken': csrfToken }, credentials: 'include' });
         if (response.ok) {
           document.cookie = 'csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
           window.location.href = '/';
@@ -112,22 +93,12 @@
         passwordChangeError = 'Passwords do not match.';
         return;
       }
-
       const csrfToken = await getCsrfToken();
       const formData = new FormData();
       formData.append('old_password', currentPassword);
       formData.append('new_password1', newPassword);
       formData.append('new_password2', newPasswordConfirm);
-
-      const response = await fetch('http://localhost:8000/change-password/', {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': csrfToken
-        },
-        body: formData,
-        credentials: 'include'
-      });
-
+      const response = await fetch('http://localhost:8000/change-password/', { method: 'POST', headers: { 'X-CSRFToken': csrfToken }, body: formData, credentials: 'include' });
       if (response.ok) {
         document.cookie = 'csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         showPasswordChange = false;
@@ -143,8 +114,8 @@
           passwordChangeError = 'Password is too similar to the username.';
         } else {
           passwordChangeError = 'Error changing password. Please try again.';
+          console.error('Error changing password:', response.status);
         }
-        console.error('Error changing password:', response.status);
       }
     } catch (error) {
       passwordChangeError = 'Error changing password. Please try again.';
@@ -155,7 +126,6 @@
 
 <main class="container my-5">
   <Header />
-
   <h1>User Profile</h1>
   {#if userProfile}
     {#if editMode}
@@ -182,14 +152,17 @@
     {:else}
       <div class="d-flex align-items-center mb-3">
         {#if userProfile.profile_picture}
-          <img src={new URL(userProfile.profile_picture, 'http://localhost:8000').href} alt="Profile Picture" class="img-thumbnail me-3" aria-hidden="true" width="100" height="100" style="margin-right: 20px;">
+          <img src={new URL(userProfile.profile_picture, 'http://localhost:8000').href} alt="Profile Picture" class="img-thumbnail me-3" aria-hidden="true" width="100" height="100" style="margin-right: 20px; border-radius: 50%; ">
         {:else}
-          <img src="https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_640.png" alt="Default Profile Picture" class="img-thumbnail me-3" aria-hidden="true" width="100" height="100" style="margin-right: 20px;">
+          <img src="https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_640.png" alt="Default Profile Picture" class="img-thumbnail me-3" aria-hidden="true" width="100" height="100" style="margin-right: 20px; border-radius: 50%;">
         {/if}
         <h2>{userProfile.username}</h2>
       </div>
+      <p>First Name: {firstName}</p>
+      <p>Last Name: {lastName}</p>
       <p>Email: {userProfile.email}</p>
       <p>Bio: {userProfile.bio}</p>
+
       <button class="btn btn-primary" on:click={() => editMode = true}>Edit Profile</button>
       <button class="btn btn-danger" on:click={() => showDeleteConfirmation = true}>Delete Account</button>
       <button class="btn btn-secondary" on:click={() => showPasswordChange = true}>Change Password</button>
@@ -200,8 +173,7 @@
 
   {#if showDeleteConfirmation}
     <div class="alert alert-danger" role="alert">
-      Are you sure you want to delete your account?
-      <button type="button" class="btn btn-danger" on:click={deleteAccount}>Confirm</button>
+      Are you sure you want to delete your account? <button type="button" class="btn btn-danger" on:click={deleteAccount}>Confirm</button>
       <button type="button" class="btn btn-secondary" on:click={() => showDeleteConfirmation = false}>Cancel</button>
     </div>
   {/if}
