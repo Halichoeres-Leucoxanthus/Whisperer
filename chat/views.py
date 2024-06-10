@@ -1,6 +1,5 @@
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from .models import Chatroom, Message
 from .forms import ChatroomForm, MessageForm
 
@@ -13,17 +12,17 @@ def create_chatroom(request):
             chatroom = form.save(commit=False)
             chatroom.creator = request.user
             chatroom.save()
-            messages.success(request, 'Chatroom created successfully')
-            return redirect('chatroom_list')
+            return JsonResponse({'success': True, 'message': 'Chatroom created successfully'})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
     else:
-        form = ChatroomForm()
-    return render(request, 'chat/create_chatroom.html', {'form': form})
+        return JsonResponse({'success': False, 'errors': 'Invalid method'})
 
 
 @login_required
 def chatroom_list(request):
-    chatrooms = Chatroom.objects.all()
-    return render(request, 'chat/chatroom_list.html', {'chatrooms': chatrooms})
+    chatrooms = Chatroom.objects.all().values('id', 'name')  # Query only required fields
+    return JsonResponse({'success': True, 'chatrooms': list(chatrooms)})
 
 
 @login_required
@@ -32,20 +31,21 @@ def send_message(request, chatroom_id):
         form = MessageForm(request.POST)
         if form.is_valid():
             message = form.save(commit=False)
-            message.chatroom = Chatroom.objects.get(id=chatroom_id)
+            message.chatroom_id = chatroom_id
             message.user = request.user
             message.save()
-            return redirect('chatroom', chatroom_id=chatroom_id)
+            return JsonResponse({'success': True, 'message': 'Message sent successfully'})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
     else:
-        form = MessageForm()
-    return render(request, 'chat/send_message.html', {'form': form, 'chatroom_id': chatroom_id})
+        return JsonResponse({'success': False, 'errors': 'Invalid method'})
 
 
 @login_required
 def chatroom(request, chatroom_id):
     chatroom = Chatroom.objects.get(id=chatroom_id)
-    messages = Message.objects.filter(chatroom=chatroom)
-    return render(request, 'chat/chatroom.html', {'chatroom': chatroom, 'messages': messages})
+    messages = Message.objects.filter(chatroom=chatroom).values('text', 'user__username')  # Query only required fields
+    return JsonResponse({'success': True, 'chatroom': chatroom.name, 'messages': list(messages)})
 
 
 @login_required
@@ -53,8 +53,6 @@ def delete_chatroom(request, chatroom_id):
     chatroom = Chatroom.objects.get(id=chatroom_id)
     if chatroom.creator == request.user:
         chatroom.delete()
-        messages.success(request, 'Chatroom deleted successfully')
-        return redirect('chatroom_list')
+        return JsonResponse({'success': True, 'message': 'Chatroom deleted successfully'})
     else:
-        messages.error(request, 'You are not authorized to delete this chatroom')
-        return redirect('chatroom_list')
+        return JsonResponse({'success': False, 'message': 'You are not authorized to delete this chatroom'})
