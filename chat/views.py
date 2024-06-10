@@ -16,6 +16,7 @@ def create_chatroom(request):
         return JsonResponse({'success': False, 'errors': 'Invalid method'})
 
 
+
 @login_required
 def chatroom_list(request):
     chatrooms = Chatroom.objects.all().values('id', 'name')
