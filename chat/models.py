@@ -9,8 +9,9 @@ class Chatroom(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def str(self):
         return self.name
+
 
 class Message(models.Model):
     chatroom = models.ForeignKey(Chatroom, on_delete=models.CASCADE)
