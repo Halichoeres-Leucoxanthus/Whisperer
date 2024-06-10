@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from django.conf.urls.static import static
 from userprofile.views import *
 
 urlpatterns = [
@@ -35,3 +35,6 @@ urlpatterns = [
     path('profile/<int:pk>/', UserProfileRetrieveUpdateDestroyView.as_view(),
          name='userprofile-retrieve-update-destroy'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

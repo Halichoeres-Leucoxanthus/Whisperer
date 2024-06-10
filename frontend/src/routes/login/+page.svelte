@@ -1,11 +1,11 @@
 <script>
     import { goto } from "$app/navigation";
-    import { onMount, setContext } from 'svelte';
     import Header from '../../components/Header.svelte';
+    import { onMount } from 'svelte';
 
     let username = '';
-    let email = '';
     let password = '';
+    let email = '';
     let errors = {};
 
     onMount(async () => {
@@ -25,7 +25,8 @@
         }
     });
 
-    let handleSubmit = async () => {
+    let handleSubmit = async (event) => {
+        event.preventDefault();
         try {
             const endpoint = 'http://localhost:8000/login/';
             const requestOptions = {
@@ -44,16 +45,28 @@
                 document.cookie = `csrftoken=${data.csrfToken}; path=/`;
                 document.cookie = `sessionid=${data.sessionId}; path=/`;
 
-                // Set the session ID in the context
-                setContext('sessionId', data.sessionId);
+                // Update session ID context
+                // updateSessionId(data.sessionId);
 
                 await goto('/');
             } else {
-                errors = data.body;
-                console.log(data);
+                const errorElement = document.getElementById('error-message');
+                if (data.body.username) {
+                    errorElement.innerHTML += `<p>Username is incorrect.</p>`;
+                }
+                if (data.body.email) {
+                    errorElement.innerHTML += `<p>Email is incorrect.</p>`;
+                }
+                if (data.body.password) {
+                    errorElement.innerHTML += `<p>Password is incorrect.</p>`;
+                }
             }
         } catch (error) {
+            // Display error message using JavaScript alert
+            alert('An error occurred while logging in. Please try again.');
             console.error('Error:', error);
+            // Refresh the page to handle the error
+            location.reload();
         }
     };
 </script>
@@ -67,25 +80,16 @@
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" bind:value={username} id="username" required>
-                {#if errors.username}
-                    <div class="invalid-feedback">Invalid username</div>
-                {/if}
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" bind:value={email} id="email" required>
-                {#if errors.email}
-                    <div class="invalid-feedback">Invalid email</div>
-                {/if}
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" bind:value={password} id="password" required>
-                {#if errors.password}
-                    <div class="invalid-feedback">Invalid password</div>
-                {/if}
             </div>
-            <button type="submit">Login</button>
+            <button type="submit" class="btn btn-primary">Login</button>
         </form>
     </div>
 </div>

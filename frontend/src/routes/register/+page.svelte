@@ -5,8 +5,8 @@
 
     let username = '';
     let password = '';
-    let name = '';
-    let surname = '';
+    let first_name = '';
+    let last_name = '';
     let email = '';
     let errors = {};
     let passwordSuccess = false;
@@ -33,7 +33,7 @@
         const requestOptions = {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: username, password: password, name: name, surname: surname, email: email })
+            body: JSON.stringify({ username: username, password: password, first_name: first_name, last_name: last_name, email: email })
         }
 
         try {
@@ -74,14 +74,14 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="name">Name:</label>
-                    <input class="form-control mb-3" type="text" placeholder="Name" bind:value={name}>
+                    <input class="form-control mb-3" type="text" placeholder="Name" bind:value={first_name}>
                     {#if errors && errors.name}
                         <p class="text-danger">{errors.name}</p>
                     {/if}
                 </div>
                 <div class="form-group col-md-6">
                     <label for="surname">Surname:</label>
-                    <input class="form-control mb-3" type="text" placeholder="Surname" bind:value={surname}>
+                    <input class="form-control mb-3" type="text" placeholder="Surname" bind:value={last_name}>
                     {#if errors && errors.surname}
                         <p class="text-danger">{errors.surname}</p>
                     {/if}

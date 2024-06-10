@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import { goto} from '$app/navigation';
+    import { goto } from '$app/navigation';
     import { page } from '$app/stores';
 
     let isAuthenticated = false;
@@ -85,14 +85,23 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-vertical">
         <ul class="navbar-nav">
             {#if isAuthenticated && userProfile}
-                <li class="nav-item">
-                    <button class="btn btn-link nav-link" on:click={navigateToProfile}>
-                        {userProfile.username}
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="btn btn-link nav-link" on:click={logout}>Logout</button>
-                </li>
+                {#if currentPage !== '/profile'}
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" on:click={navigateToProfile}>
+                            {userProfile.username}
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" on:click={logout}>Logout</button>
+                    </li>
+                {:else}
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" on:click={navigateToHome}>Home</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" on:click={logout}>Logout</button>
+                    </li>
+                {/if}
             {:else}
                 {#if currentPage === '/register'}
                     <li class="nav-item">

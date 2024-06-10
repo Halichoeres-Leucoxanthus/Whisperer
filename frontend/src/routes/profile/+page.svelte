@@ -20,10 +20,22 @@
       const response = await fetch('http://localhost:8000/user-profile/', {
         credentials: 'include'
       });
-      userProfile = await response.json();
-      newUsername = userProfile.username;
-      newEmail = userProfile.email;
-      newBio = userProfile.bio;
+      const data = await response.json();
+      console.log('Profile Picture URL:', data.profile_picture); // Log the profile picture URL
+      userProfile = data;
+      newUsername = data.username;
+      newEmail = data.email;
+      newBio = data.bio;
+
+      if (data.profile_picture) {
+        const profilePictureResponse = await fetch(`http://localhost:8000${data.profile_picture}`, {
+          credentials: 'include'
+        });
+        const profilePicture = await profilePictureResponse.blob();
+        userProfile.profile_picture = URL.createObjectURL(profilePicture);
+      } else {
+        userProfile.profile_picture = 'https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_640.png';
+      }
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
@@ -170,7 +182,9 @@
     {:else}
       <div class="d-flex align-items-center mb-3">
         {#if userProfile.profile_picture}
-          <img src={`http://localhost:8000${userProfile.profile_picture}`} alt="Profile Picture" class="img-thumbnail me-3" aria-hidden="true">
+          <img src={new URL(userProfile.profile_picture, 'http://localhost:8000').href} alt="Profile Picture" class="img-thumbnail me-3" aria-hidden="true" width="100" height="100" style="margin-right: 20px;">
+        {:else}
+          <img src="https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_640.png" alt="Default Profile Picture" class="img-thumbnail me-3" aria-hidden="true" width="100" height="100" style="margin-right: 20px;">
         {/if}
         <h2>{userProfile.username}</h2>
       </div>
@@ -214,77 +228,3 @@
     </form>
   {/if}
 </main>
-
-<style>
-
-
-  .container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 20px;
-    background-color: #444;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  }
-
-  .d-flex {
-    display: flex;
-  }
-
-  .align-items-center {
-    align-items: center;
-  }
-
-  .mb-3 {
-    margin-bottom: 20px;
-  }
-
-  .form-control {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: none;
-    border-radius: 10px;
-    background-color: #555;
-    color: #fff;
-  }
-
-  .form-control:focus {
-    background-color: #666;
-  }
-
-  .btn {
-    padding: 10px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-  }
-
-  .btn-primary {
-    background-color: #666;
-    color: #fff;
-  }
-
-  .btn-primary:hover {
-    background-color: #777;
-  }
-
-  .btn-danger {
-    background-color: #ff0000;
-    color: #fff;
-  }
-
-  .btn-danger:hover {
-    background-color: #ff3333;
-  }
-
-  .btn-secondary {
-    background-color: #333;
-    color: #fff;
-  }
-
-  .btn-secondary:hover {
-    background-color: #444;
-  }
-
-</style>
