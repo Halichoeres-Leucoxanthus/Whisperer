@@ -54,14 +54,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
     password = serializers.CharField(max_length=128, write_only=True)
 
     def validate(self, data):
         username = data.get('username')
+        email = data.get('email')
         password = data.get('password')
 
-        if username and password:
-            user = authenticate(username=username, password=password)
+        if username and email and password:
+            user = authenticate(username=username, email=email, password=password)
             if user:
                 if user.is_active:
                     data['user'] = user
@@ -70,11 +72,11 @@ class UserLoginSerializer(serializers.Serializer):
             else:
                 # Check if the user exists but the password is incorrect
                 try:
-                    user = User.objects.get(username=username)
+                    user = User.objects.get(username=username, email=email)
                     raise serializers.ValidationError("Invalid password.")
-                except User.DoesNotExist:
-                    raise serializers.ValidationError("Invalid username.")
+                except (User.DoesNotExist, User.MultipleObjectsReturned):
+                    raise serializers.ValidationError("Invalid username or email.")
         else:
-            raise serializers.ValidationError("Must include 'username' and 'password'.")
+            raise serializers.ValidationError("Must include 'username', 'email', and 'password'.")
 
         return data

@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from userprofile.views import UserRegisterView, UserLoginView, UserLogoutView, get_csrf_token, check_login
+from userprofile.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,4 +26,12 @@ urlpatterns = [
     path('logout/', UserLogoutView.as_view(), name='logout'),
     path('get-csrf-token/', get_csrf_token, name='get-csrf-token'),
     path('check-login/', check_login, name='check_login'),
+    path('user-profile/', UserProfileView.as_view(), name='user-profile'),
+
+    # Profiles URLs
+    path('profile/', UserProfileListCreateView.as_view(), name='userprofile-list-create'),
+    path('delete-account/', DeleteAccountView.as_view(), name='delete-account'),
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('profile/<int:pk>/', UserProfileRetrieveUpdateDestroyView.as_view(),
+         name='userprofile-retrieve-update-destroy'),
 ]

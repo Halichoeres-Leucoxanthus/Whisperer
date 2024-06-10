@@ -4,7 +4,7 @@ from django.db import models
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(blank=True)
+    bio = models.TextField(blank=True, default='')
     profile_picture = models.ImageField(upload_to='profile_pics', null=True, blank=True)
 
     @classmethod

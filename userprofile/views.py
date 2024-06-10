@@ -9,6 +9,7 @@ from .models import UserProfile
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.forms import PasswordChangeForm
 from Whisperer import settings
+from django.middleware.csrf import get_token
 import os
 
 
@@ -61,6 +62,8 @@ class UserRegisterView(APIView):
             return Response({
                 'user': {
                     'id': user.id,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
                     'username': user.username,
                     'email': user.email
                 }
@@ -101,15 +104,16 @@ class UserLoginView(APIView):
             user = serializer.validated_data['user']
             login(request, user)
             request.session['is_authenticated'] = True
-            return Response({
+            response = Response({
                 'user': {
                     'id': user.id,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
                     'username': user.username,
                     'email': user.email
-                }
+                },
+                'csrfToken': get_token(request),
+                'sessionId': request.session.session_key
             }, status=status.HTTP_200_OK)
+            return response
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -118,11 +122,18 @@ class UserLogoutView(APIView):
     def post(self, request):
         if request.user.is_authenticated:
             logout(request)
-            request.session['is_authenticated'] = True
+            request.session['is_authenticated'] = False
             request.session.flush()
-            return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+            response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+            self.clear_cookies(response)
+            return response
         else:
             return Response({'error': 'User is not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def clear_cookies(self, response):
+        response.delete_cookie('csrftoken')
+        response.delete_cookie('sessionid')
+        return response
 
 
 @ensure_csrf_cookie
