@@ -26,38 +26,37 @@ onMount(async () => {
     }
 });
 let handleSubmit = async () => {
-    const endpoint = 'http://localhost:8000/login/';
-    const requestOptions = {
-    method: "POST",
-    headers: {
-    'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({username: username, email: email, password: password}) 
-    }
-
     try {
-    const response = await fetch(endpoint, requestOptions);
-    const data = await response.json();
+        const endpoint = 'http://localhost:8000/login/';
+        const requestOptions = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: username, email: email, password: password })
+        };
 
-    if (response.status === 200) {
-    // Set the CSRF token and session ID in the cookies
-    document.cookie = `csrftoken=${data.csrfToken}; path=/`;
-    document.cookie = `sessionid=${data.sessionId}; path=/`;
+        const response = await fetch(endpoint, requestOptions);
+        const data = await response.json();
 
-    // Set the session ID in the context
-    setContext('sessionId', data.sessionId);
+        if (response.status === 200) {
+            // Set the CSRF token and session ID in the cookies
+            document.cookie = `csrftoken=${data.csrfToken}; path=/`;
+            document.cookie = `sessionid=${data.sessionId}; path=/`;
 
-    await goto('/');} 
-    
-    else {
-        errors = data.body;
-        console.log(data);
-    }
-} 
-    catch (error) {
+            // Set the session ID in the context
+            setContext('sessionId', data.sessionId);
+
+            await goto('/');
+        } else {
+            errors = data.body;
+            console.log(data);
+        }
+    } catch (error) {
         console.error('Error:', error);
     }
-}
+};
+
 </script>
 
 <Header />
