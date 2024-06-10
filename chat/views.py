@@ -55,7 +55,7 @@ def chatroom_list(request):
 def chatroom(request, chatroom_id):
     chatroom = Chatroom.objects.get(id=chatroom_id)
     messages = Message.objects.filter(chatroom=chatroom).values('text', 'user__username')
-    return JsonResponse({'success': True, 'chatroom': chatroom.name, 'messages': list(messages)})
+    return JsonResponse({'chatroom': chatroom.name, 'messages': list(messages)})
 
 
 @login_required

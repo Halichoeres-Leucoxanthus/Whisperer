@@ -246,10 +246,8 @@
             {#each chatrooms as chatroom}
                 {#if chatroom.type === 'global' || (chatroom.type === 'private' && chatroom.creator_id === userProfile.id) || (chatroom.type === 'private' && chatroom.users || [])}
                     <li>
-                        <a href="/chatroom/{chatroom.id}">{chatroom.name}</a>
-                        {#if chatroom.type === 'global'}
+												<a href="/chatroom/{chatroom.id}">{chatroom.name}</a>
                             <button on:click={() => deleteChatroom(chatroom.id)}>Delete Chatroom</button>
-                        {/if}
                     </li>
                 {/if}
             {/each}

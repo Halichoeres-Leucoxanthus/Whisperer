@@ -1,6 +1,5 @@
 <script>
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
 	import Header from '../../components/Header.svelte';
 
 	let chatroomId = '';
@@ -9,16 +8,16 @@
 	let newMessage = '';
 
 	async function getChatroomMessages() {
-		const response = await fetch(`http://localhost:8000/chatroom/${chatroomId}/`, {
+		const response = await fetch(`/chatroom/${chatroomId}/messages/`, {
 			credentials: 'include'
 		});
-		const { messages } = await response.json();
-		return messages;
+		const data = await response.json();
+		return data.messages;
 	}
 
 	async function sendMessage() {
 		try {
-			const response = await fetch(`http://localhost:8000/send_message/${chatroomId}/`, {
+			const response = await fetch(`/chatroom/${chatroomId}/send_message/`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -29,7 +28,6 @@
 				credentials: 'include'
 			});
 			if (response.ok) {
-				// Handle successful message sending
 				newMessage = '';
 				messages = await getChatroomMessages();
 			} else {
@@ -42,8 +40,8 @@
 
 	onMount(async () => {
 		try {
-			chatroomId = page.url.pathname.split('/')[2];
-			chatroomName = await fetch(`http://localhost:8000/chatroom/${chatroomId}/`).then(response => response.json()).then(data => data.name);
+			chatroomId = window.chatroomId;
+			chatroomName = window.chatroomName;
 			messages = await getChatroomMessages();
 		} catch (error) {
 			console.error('Error loading chatroom:', error);
