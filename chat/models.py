@@ -15,7 +15,6 @@ class Chatroom(models.Model):
         return self.name
 
 
-
 class Message(models.Model):
     chatroom = models.ForeignKey(Chatroom, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
