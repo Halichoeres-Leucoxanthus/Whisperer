@@ -19,6 +19,7 @@ from django.urls import path
 from django.conf.urls.static import static
 from userprofile.views import *
 from chat.views import *
+from chat.views import WebSocketChatView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -45,6 +46,9 @@ urlpatterns = [
 
     # Chat URLs
     path('send_message/<int:chatroom_id>/', send_message, name='send_message'),
+
+    # WebSocket URLs
+    path('ws/chat/<int:chatroom_id>/', WebSocketChatView.as_view(), name='websocket-chat'),
 ]
 
 if settings.DEBUG:
