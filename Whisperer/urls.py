@@ -19,7 +19,6 @@ from django.urls import path
 from django.conf.urls.static import static
 from userprofile.views import *
 from chat.views import *
-from chat.views import WebSocketChatView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,6 +28,7 @@ urlpatterns = [
     path('get-csrf-token/', get_csrf_token, name='get-csrf-token'),
     path('check-login/', check_login, name='check_login'),
     path('user-profile/', UserProfileView.as_view(), name='user-profile'),
+    path('get-available-users/', get_available_users, name='get_available_users'),
 
     # Profiles URLs
     path('profile/', UserProfileListCreateView.as_view(), name='userprofile-list-create'),
@@ -39,16 +39,13 @@ urlpatterns = [
 
 
     # Chatroom URLs
+    path('chatroom/<int:chatroom_id>/', chatroom, name='chatroom'),
+    path('send_message/<int:chatroom_id>/', send_message, name='send_message'),
+    path('delete_chatroom/<int:chatroom_id>/', delete_chatroom, name='delete_chatroom'),
     path('create_chatroom/', create_chatroom, name='create_chatroom'),
     path('chatroom_list/', chatroom_list, name='chatroom_list'),
-    path('chatroom/<int:chatroom_id>/', chatroom, name='chatroom'),
-    path('delete_chatroom/<int:chatroom_id>/', delete_chatroom, name='delete_chatroom'),
-
     # Chat URLs
     path('send_message/<int:chatroom_id>/', send_message, name='send_message'),
-
-    # WebSocket URLs
-    path('ws/chat/<int:chatroom_id>/', WebSocketChatView.as_view(), name='websocket-chat'),
 ]
 
 if settings.DEBUG:

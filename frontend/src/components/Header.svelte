@@ -6,6 +6,19 @@
     let isAuthenticated = false;
     let userProfile = null;
     let currentPage = '';
+    let chatrooms = [];
+    let newChatroomName = '';
+    let newChatroomDescription = '';
+    let newChatroomType = 'private';
+    let newChatroomUsers = [];
+
+    async function getAvailableUsers() {
+        const response = await fetch('http://localhost:8000/get-available-users/', {
+            credentials: 'include'
+        });
+        const { users } = await response.json();
+        return users;
+    }
 
     onMount(async () => {
         try {
@@ -20,6 +33,18 @@
                     credentials: 'include'
                 });
                 userProfile = await profileResponse.json();
+
+                // Fetch chatrooms for the user
+                const chatroomsResponse = await fetch('http://localhost:8000/chatroom_list/', {
+                    credentials: 'include'
+                });
+                const chatroomsData = await chatroomsResponse.json();
+                chatrooms = chatroomsData.chatrooms;
+
+                if (newChatroomType === 'private') {
+                    const availableUsers = await getAvailableUsers();
+                    newChatroomUsers = availableUsers.filter(user => user.id !== userProfile.id);
+                }
             }
         } catch (error) {
             console.error('Error checking login status:', error);
@@ -77,10 +102,65 @@
             console.error('Error during logout:', error);
         }
     }
+
+    async function createChatroom() {
+        try {
+            const csrfToken = await getCsrfToken();
+            const response = await fetch('http://localhost:8000/create_chatroom/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    name: newChatroomName,
+                    description: newChatroomDescription,
+                    type: newChatroomType,
+                    users: newChatroomUsers
+                }),
+                credentials: 'include'
+            });
+            if (response.ok) {
+                // Handle successful creation of chatroom
+                newChatroomName = '';
+                newChatroomDescription = '';
+                newChatroomType = 'private';
+                newChatroomUsers = [];
+            } else {
+                console.error('Error creating chatroom:', response.status);
+            }
+        } catch (error) {
+            console.error('Error creating chatroom:', error);
+        }
+    }
+
+    async function deleteChatroom(chatroomId) {
+        try {
+            const csrfToken = await getCsrfToken();
+            const response = await fetch(`http://localhost:8000/delete_chatroom/${chatroomId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'include'
+            });
+            if (response.ok) {
+                // Handle successful deletion of chatroom
+                console.log('Chatroom deleted successfully');
+                // You may want to update the chatrooms list here
+            } else {
+                console.error('Error deleting chatroom:', response.status);
+            }
+        } catch (error) {
+            console.error('Error deleting chatroom:', error);
+        }
+    }
 </script>
+
 <style>
     @import "../../static/whisperer.css";
 </style>
+
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-vertical">
         <ul class="navbar-nav">
@@ -129,3 +209,50 @@
         </ul>
     </nav>
 </header>
+
+{#if isAuthenticated}
+    <div class="chatrooms-container">
+        <h2>Create Chatroom</h2>
+        <form on:submit|preventDefault={createChatroom}>
+            <div class="mb-3">
+                <label for="chatroom-name" class="form-label">Chatroom Name:</label>
+                <input type="text" class="form-control" id="chatroom-name" bind:value={newChatroomName} required>
+            </div>
+            <div class="mb-3">
+                <label for="chatroom-description" class="form-label">Chatroom Description:</label>
+                <textarea class="form-control" id="chatroom-description" bind:value={newChatroomDescription} required></textarea>
+            </div>
+            {#if newChatroomType === 'private'}
+                <div class="mb-3">
+                    <label for="selected-users" class="form-label">Select Users:</label>
+                    <select class="form-control" id="selected-users" multiple bind:value={newChatroomUsers} required>
+                        {#each newChatroomUsers as user}
+                            <option value={user.id}>{user.username}</option>
+                        {/each}
+                    </select>
+                </div>
+            {/if}
+            <div class="mb-3">
+                <label for="chatroom-type" class="form-label">Chatroom Type:</label>
+                <select class="form-control" id="chatroom-type" bind:value={newChatroomType} required>
+                    <option value="private">Private</option>
+                    <option value="global">Global</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Chatroom</button>
+        </form>
+        <h2>Your Chatrooms</h2>
+        <ul>
+            {#each chatrooms as chatroom}
+                {#if chatroom.type === 'global' || (chatroom.type === 'private' && chatroom.creator_id === userProfile.id) || (chatroom.type === 'private' && chatroom.users || [])}
+                    <li>
+                        <a href="/chatroom/{chatroom.id}">{chatroom.name}</a>
+                        {#if chatroom.type === 'global'}
+                            <button on:click={() => deleteChatroom(chatroom.id)}>Delete Chatroom</button>
+                        {/if}
+                    </li>
+                {/if}
+            {/each}
+        </ul>
+    </div>
+{/if}
