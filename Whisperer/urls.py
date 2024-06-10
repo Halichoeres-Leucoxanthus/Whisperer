@@ -42,6 +42,8 @@ urlpatterns = [
     path('chatroom/<int:chatroom_id>/', chatroom, name='chatroom'),
     path('delete_chatroom/<int:chatroom_id>/', delete_chatroom, name='delete_chatroom'),
 
+    # Chat URLs
+    path('send_message/<int:chatroom_id>/', send_message, name='send_message'),
 ]
 
 if settings.DEBUG:
