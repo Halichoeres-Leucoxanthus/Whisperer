@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls.static import static
 from userprofile.views import *
+from chat.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +35,13 @@ urlpatterns = [
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('profile/<int:pk>/', UserProfileRetrieveUpdateDestroyView.as_view(),
          name='userprofile-retrieve-update-destroy'),
+
+    # Chatroom URLs
+    path('create_chatroom/', create_chatroom, name='create_chatroom'),
+    path('chatroom_list/', chatroom_list, name='chatroom_list'),
+    path('chatroom/<int:chatroom_id>/', chatroom, name='chatroom'),
+    path('delete_chatroom/<int:chatroom_id>/', delete_chatroom, name='delete_chatroom'),
+
 ]
 
 if settings.DEBUG:
