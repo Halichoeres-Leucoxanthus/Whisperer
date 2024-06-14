@@ -28,7 +28,6 @@ class DeleteAccountView(APIView):
         user_profile.delete()
         user.delete()
         logout(request)
-        request.session['is_authenticated'] = True
         request.session.flush()
         return Response({'message': 'Account Deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
 
@@ -43,7 +42,6 @@ class ChangePasswordView(APIView):
             user = form.save()
             update_session_auth_hash(request, user)
             logout(request)
-            request.session['is_authenticated'] = True
             request.session.flush()
             return Response({'message': 'Password Changed Successfully'}, status=status.HTTP_200_OK)
         else:
@@ -57,7 +55,6 @@ class UserRegisterView(APIView):
             user = serializer.save()
             login(request, user)
             request.session['is_authenticated'] = True
-            # Add the following line to destroy the session
             request.session.flush()
             return Response({
                 'user': {
@@ -122,7 +119,6 @@ class UserLogoutView(APIView):
     def post(self, request):
         if request.user.is_authenticated:
             logout(request)
-            request.session['is_authenticated'] = False
             request.session.flush()
             response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
             self.clear_cookies(response)

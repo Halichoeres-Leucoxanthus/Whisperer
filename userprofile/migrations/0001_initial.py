@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     ]
     operations = [
         migrations.CreateModel(
-            name='UserProfile',
+            name='Profile',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('bio', models.TextField(blank=True, null=True)),
