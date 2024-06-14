@@ -5,8 +5,13 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from rest_framework.generics import get_object_or_404
-from .models import Chatroom, Message
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import Chatroom, Message, Notification
 import json
+
+from .serializers import NotificationSerializer
 
 
 @ensure_csrf_cookie
@@ -117,3 +122,32 @@ def get_chatroom_by_name(request, room_name):
         return JsonResponse({'id': chatroom.id, 'name': chatroom.name, 'type': chatroom.type})
     except Chatroom.DoesNotExist:
         return JsonResponse({'error': 'Chatroom does not exist'}, status=404)
+
+
+@ensure_csrf_cookie
+@csrf_exempt
+def send_notification(request):
+    message = request.GET.get('message', 'Default notification message')
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        'notifications',  # This should match the group name in consumer
+        {
+            'type': 'notification_message',
+            'message': message
+        }
+    )
+    return JsonResponse({'status': 'Notification sent!'})
+
+
+class NotificationView(APIView):
+    def get(self, request):
+        notifications = Notification.objects.all()
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = NotificationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)

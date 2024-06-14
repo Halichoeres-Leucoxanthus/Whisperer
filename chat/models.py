@@ -25,3 +25,9 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message in {self.chatroom.name} by {self.user.username}"
+
+
+class Notification(models.Model):
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

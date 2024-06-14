@@ -15,10 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from django.conf.urls.static import static
+from chat import consumers
 from userprofile.views import *
 from chat.views import *
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,7 +31,9 @@ urlpatterns = [
     path('check-login/', check_login, name='check_login'),
     path('user-profile/', UserProfileView.as_view(), name='user-profile'),
     path('get-available-users/', get_available_users, name='get_available_users'),
-    
+    path('ws/notifications/', consumers.NotificationConsumer.as_asgi(), name='ws_notifications'),
+    path('notifications/', NotificationView.as_view()),
+
     # Profiles URLs
     path('profile/', UserProfileListCreateView.as_view(), name='userprofile-list-create'),
     path('delete-account/', DeleteAccountView.as_view(), name='delete-account'),
@@ -47,8 +51,10 @@ urlpatterns = [
     path('chatroom/<int:chatroom_id>/', chatrooms, name='chatroom'),
 ]
 
+# Static and media URL configurations for development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 chatrooms = Chatroom.objects.all()
 for chatroom in chatrooms:

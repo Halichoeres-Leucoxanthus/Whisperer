@@ -9,6 +9,7 @@ application = ProtocolTypeRouter({
         AuthMiddlewareStack(
             URLRouter([
                 re_path(r'ws/chat/(?P<chatroom_id>\d+)/$', consumers.ChatConsumer.as_asgi()),
+                re_path(r'ws/notifications/$', consumers.NotificationConsumer.as_asgi()),
             ])
         )
     ),
