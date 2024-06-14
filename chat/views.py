@@ -98,6 +98,7 @@ def send_message(request, chatroom_id):
     else:
         return JsonResponse({'success': False, 'errors': 'Invalid method'})
 
+
 @csrf_exempt
 @ensure_csrf_cookie
 def delete_chatroom(request, chatroom_id):
